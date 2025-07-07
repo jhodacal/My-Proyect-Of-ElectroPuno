@@ -1,0 +1,18 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "types": ["react-native"],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+ "src/backend/server.js", "src/utils/LanguageContext.js", "src/screens/settings/NotificationSystem.js", "src/app/index.js", "src/screens/Others/ChatBot.tsx", "src/app/Ventana9.js"]
+}
