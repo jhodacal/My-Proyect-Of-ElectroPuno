@@ -7,7 +7,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { useRouter } from 'expo-router';
 import { useLanguage } from 'C:/Users/amigo/Downloads/PROYECTO PYTHON/PROYECTOS CON REACT NATIVE/MyApp/src/utils/LanguageContext';
 
-interface EnergyData {
+interface EnergyData { //este es mi comentario luigi
   voltage: number;
   current: number;
   power: number;
