@@ -4,14 +4,14 @@ import { BackHandler ,View,StyleSheet,Text,ScrollView} from 'react-native';
 import { useEffect } from 'react';
 import { ThemeProvider } from '../herramientasDeLaApp/ThemeContext';
 import BackButton from '../herramientasDeLaApp/BackButton';
-import DiagnosticoMantenimiento from './Settings/DiagnosticoMantenimiento';
 import { useTheme } from '../herramientasDeLaApp/ThemeContext';
 import { useLanguage } from '../herramientasDeLaApp/LanguageContext';
+import AboutScreen from '../app/Settings/about';
 
 
 const router = useRouter();
 
-function Ventana4() {
+function Ventana3() {
   const { theme } = useTheme();
   const { t } = useLanguage();
     useEffect(() => {
@@ -39,7 +39,7 @@ function Ventana4() {
         {/* Header fijo */}
         <View style={[styles.header, themedStyles.header(theme)]}>
           <BackButton onPress={() => router.back()} tintColor={themedStyles.text(theme).color} />
-          <Text style={[styles.title,themedStyles.text(theme)]}> {t('Diagnostico y Mantenimiento')}</Text>
+          <Text style={[styles.title,themedStyles.text(theme)]}> {t('Consumo En Tiempo Real')}</Text>
         </View>
 
         {/* Contenido desplazable */}
@@ -47,7 +47,7 @@ function Ventana4() {
           contentContainerStyle={styles.scrollContent}
           style={styles.scrollView}
         >
-          <DiagnosticoMantenimiento />
+          <AboutScreen />
         </ScrollView>
       </View>
     </ThemeProvider>
@@ -95,4 +95,4 @@ const themedStyles = {
   text: (theme: string) => ({ color: theme === 'dark' ? '#ffffff' : '#000000' }),
 };
 
-export default Ventana4;
+export default Ventana3;

@@ -1,299 +1,905 @@
 import React, { useState, useEffect, useRef } from "react";
-import {Animated,ImageBackground, ScrollView, View, Text, Image, TouchableOpacity, Alert, BackHandler, TextInput, Dimensions,} from "react-native";
-import LoginModal from "../screens/Auth/LoginModal";
-import RegisterModal from "../screens/Auth/RegisterModal";
+import {StatusBar ,Animated,ScrollView,View,Text,ImageBackground, TouchableOpacity,Alert,Platform,KeyboardAvoidingView,BackHandler, TextInput, Dimensions, StyleSheet} from "react-native";
+import { BlurView } from 'expo-blur';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useColorScheme } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../utils/ThemeContext';
-import { StyleSheet } from 'react-native';
-import SideMenu from '../screens/Others/SideMenu';
-import ChatBot from '../screens/Others/ChatBot';
-import { useLanguage } from 'C:/Users/amigo/Downloads/PROYECTO PYTHON/PROYECTOS CON REACT NATIVE/MyApp/src/utils/LanguageContext'; // Importar el contexto de idioma
+import { useTheme } from '../herramientasDeLaApp/ThemeContext';
+import SideMenu from '../PantallasSecundarias/SideMenu/SideMenu.tsx';
+import ChatBot from '../PantallasSecundarias/chatbot/ChatBot';
+import { useLanguage } from '../herramientasDeLaApp/LanguageContext';
+import AnimatedCarousel from './AnimatedCarousel';
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Estilos para el componente HomeScreen/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// Definición actualizada de ventanas con traducciones
-const ventanas = [
-  { number: 1, titleKey: 'consumo en tiempo real', color: '#3498db', icon: 'electric-bolt' },
-  { number: 2, titleKey: 'Analisis de Consumo', color: '#2ecc71', icon: 'show-chart' },
-  { number: 3, titleKey: 'Historial de Consumo', color: '#e74c3c', icon: 'history' },
-  { number: 4, titleKey: 'Comparaciones y Tendencias  ', color: '#9b59b6', icon: 'compare' },
-  { number: 5, titleKey: 'Diagnosticos y Mantenimiento', color: '#9b59b6', icon: 'build' },
-  { number: 6, titleKey: 'Alertas y Notificaciones', color: '#f39c12', icon: 'notifications' },
-  { number: 7, titleKey: 'Pagos por QR', color: '#1abc9c', icon: 'qr-code' },
-  { number: 8, titleKey: 'proveedores', color: '#1abc9c', icon: 'local-shipping' },
-  { number: 9, titleKey: 'configuración', color: '#34495e', icon: 'settings' },
-  { number:10, titleKey: 'Ayuda', color: '#7f8c8d', icon: 'help' },
-  ];
-  
+const { width, height } = Dimensions.get('window');
+ 
 const styles = StyleSheet.create({
-  ajustes: { flex: 1, padding: 20, marginLeft: 200, marginBottom: 450,borderWidth: 10, borderTopLeftRadius: 10, borderBottomLeftRadius: 10 },
-  container: { flex: 1, alignItems: "center",alignContent: "center", backgroundColor:"black"  },
-  image: {  height: 200, width: 200, position: "absolute", top: 220, left: '50%',marginLeft: -100 },
-  button: {  backgroundColor: '#007bff', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 8, marginTop: 500 },
-  buttonText: { color: 'white', fontSize: 16, fontWeight: 'bold', textAlign: 'center' },
-  dashboardContainer: { justifyContent: "center", alignItems: "center" },
-  title: { alignItems:"center",backgroundSize:"red",fontStyle:"italic", fontSize: 50, top: 50, fontWeight: "bold", color: "skyblue", position: "absolute" },
-  welcomeText: {  marginTop: 50, fontSize: 50, fontWeight: "bold", marginBottom: 20,  textAlign: 'center' },
-  recoverButton: { backgroundColor: 'orange', marginTop: 10, borderRadius: 6, padding: 10 },
-  buttonContainer: { flexDirection: "column",paddingBottom: 20 ,alignItems: "center"},
-  input: { backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 8, borderRadius: 6, width: 200, textAlign: 'center',color: '#000'},
-  squareButton: {height: 100, justifyContent: "center", alignItems: "center", marginVertical: 20, borderRadius: 30,flexDirection: 'row',width: 360},
-  linkText: { color: "#1E90FF", textDecorationLine: "underline", fontSize: 14 },
-  recoverButtonText: { color: 'white', fontWeight: 'bold', textAlign: 'center' },
-  menuButton: {position: 'absolute',top: 50,left: 20,zIndex: 100,padding: 10,borderRadius: 20,elevation: 3,},
-  letra:{color:"grey"},
-  closeButton: { position: 'absolute', top: 1, right: 1, zIndex: 1 },
-  themeSwitchContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10, paddingLeft: 30 },
-  buttonIcon: {marginRight: 10},
-  // Estilos para el selector de idioma
-  languageSelector: {position: 'absolute',top: 50,right: 20,zIndex: 100,flexDirection: 'row',backgroundColor: 'rgba(0,0,0,0.1)',borderRadius: 20,padding: 5,},
-  languageButton: {paddingHorizontal: 10,paddingVertical: 5,borderRadius: 15,marginHorizontal: 2,},
-  activeLanguage: {backgroundColor: '#3498db'},
-  languageText: {fontWeight: 'bold', },  
+  // Estilos de AuthScreen integrados
+  container: {flex: 1,height: '110%'},
+  backgroundImage: {flex: 1,width: '100%',height: '100%',position: 'absolute',marginTop: 0 },
+  overlay: {flex: 1, justifyContent: 'center',alignItems: 'center',paddingHorizontal: 20, },
+  //inicio de estilos de login y registro
+  contentContainer: {
+    width: '110%',
+    maxWidth: 400,
+  },
+  blurContainer: {
+    borderRadius: 20,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  glowContainer: {
+    padding: 30,
+    shadowColor: '#00FFFF',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowRadius: 20,
+    elevation: 20,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 80,
+    marginTop:0,
+    paddingTop:0,
+  },
+    logoTextEmoji: {
+      marginTop: 20,
+    fontSize: 50,
+    fontWeight: 'bold',
+    color: '#00FFFF',
+    textAlign: 'center',
+    textShadowColor: '#00FFFF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+  logoText1: {
+    position: 'absolute',
+    fontSize: 55,
+    fontWeight: 'bold',
+    color: '#00FFFF',
+    textAlign: 'center',
+    textShadowColor: '#00FFFF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+  },
+    logoText2: {
+    position: 'absolute',
+    fontSize: 44,
+    fontWeight: 'bold',
+    color: '#00FFFF',
+    textAlign: 'center',
+    textShadowColor: '#00FFFF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    marginTop: 50,
+  },
+  logoSubtext: {
+    fontSize: 12,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginTop: 30,
+    opacity: 0.8,
+  },
+  formContainer: {
+    alignItems: 'center',
+  },
+  scrollContainer: {
+    maxHeight: height * 0.7,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 10,
+    textShadowColor: '#00FFFF',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#CCCCCC',
+    textAlign: 'center',
+    marginBottom: 30,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 15,
+    marginBottom: 15,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(0,255,255,0.3)',
+    width: '100%',
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 16,
+    paddingVertical: 15,
+  },
+  eyeButton: {
+    padding: 5,
+  },
+  primaryButton: {
+    width: '100%',
+    borderRadius: 15,
+    marginVertical: 15,
+    overflow: 'hidden',
+  },
+  gradientButton: {
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 14, // Reduced font size to fit smaller buttons
+    fontWeight: 'bold',
+    textAlign: 'center',
+    textShadowColor: '#000000',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    flexShrink: 1, // Allow text to shrink if needed
+    flexWrap: 'wrap', // Allow text to wrap to the next line
+    paddingHorizontal: 5,
+  },
+
+  disabledButton: {
+    opacity: 0.6,
+  },
+  linkContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  linkText: {
+    color: '#00FFFF',
+    fontSize: 14,
+    textAlign: 'center',
+    marginVertical: 5,
+    textDecorationLine: 'underline',
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 15,
+    width: '100%',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: '#00FFFF',
+    borderRadius: 4,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  checkboxChecked: {
+    backgroundColor: '#00FFFF',
+  },
+
+  // Estilos originales para la pantalla principal
+  ajustes: {
+    flex: 1,
+    padding: 20,
+    marginLeft: 200,
+    marginBottom: 450,
+    borderWidth: 10,
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10
+  },
+  image: {
+    height: "100%",
+    width: "100%",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    resizeMode: "cover"
+  },
+  button: {
+    shadowOpacity: 0.8,
+    elevation: 10,
+    marginTop: 30,
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 8,
+    marginTop: 500
+  },
+  dashboardContainer: {
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  title1: {
+    alignItems:"center",
+    fontStyle:"italic",
+    fontSize: 60,
+    top: 50,
+    marginRight: 10,
+    marginLeft:10,
+    fontWeight: "bold",
+    position: "absolute",
+    textAlign: "center"
+  },
+  title2: {
+    alignItems:"center",
+    fontStyle:"italic",
+    fontSize: 60,
+    top: 120,
+    marginRight: 10,
+    marginLeft:10,
+    fontWeight: "bold",
+    position: "absolute",
+    textAlign: "center"
+  },
+headerwelcome: {
   
+  marginTop:20,
+  alignSelf: 'center',
+  paddingVertical: 15,
+  paddingHorizontal: 60,
+  shadowColor: '#00d4ff',
+  shadowOffset: { width: 0, height: 8 },
+  shadowRadius: 20,
+  elevation: 15,
+},
+
+
+headerGradientwelcome: {
+  
+  paddingVertical: 15,
+  paddingHorizontal: 0,
+  borderRadius: 25,
+  alignSelf: 'center',
+},
+
+
+welcomeText: {
+  fontSize: 40,
+  fontWeight: 'bold',
+  color: '#00d4ff',
+  textAlign: 'center',
+  textShadowColor: '#00d4ff',
+  textShadowOffset: { width: 0, height: 0 },
+  textShadowRadius: 10,
+},
+
+  recoverButton: {
+    backgroundColor: 'orange',
+    marginTop: 10,
+    borderRadius: 6,
+    padding: 10
+  },
+  buttonContainer: {
+    flexDirection: 'row', // Change to row for multi-column
+    flexWrap: 'wrap', // Allow buttons to wrap to the next row
+    justifyContent: 'space-between', // Space buttons evenly
+    paddingHorizontal: 10, // Add padding to the container
+    alignItems: 'center',
+  },
+  squareButton: {
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 15, // Reduced margin for better spacing
+    marginHorizontal: 5, // Add horizontal margin for spacing between columns
+    borderRadius: 15,
+    flexDirection: 'row',
+    width: (width - 40) / 2, // Divide screen width for two columns, accounting for padding
+  },
+  recoverButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center'
+  },
+  menuButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 100,
+    padding: 10,
+    borderRadius: 20,
+    elevation: 3,
+  },
+
+  letra: {
+    color:"grey"
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 1,
+    right: 1,
+    zIndex: 1
+  },
+  themeSwitchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+    paddingLeft: 30
+  },
+  buttonIcon: {
+    marginRight: 3,
+    marginLeft: 10,
+  },
+
 });
 
-// Componente VentanaButton actualizado con soporte para traducciones
-const VentanaButton = ({ number, titleKey, color, icon }) => {
-    const router = useRouter();
-    const { theme } = useTheme();
-    const { t } = useLanguage(); // Usar el hook de idioma
-    const handlePress = () => {
-            // Mapeo de números a rutas específicas para las nuevas ventanas
-      const routeMap = { 
-        1: '../../Ventana1', 
-        2: '../../Ventana2', 
-        3: '../../Ventana3',
-        4: '../../Ventana4', 
-        5: '../../Ventana5',
-        6: '../../Ventana6',
-        7: '../../Ventana7',
-        8: '../../Ventana8',
-        9: '../../Ventana9',
-        10: '../../AlertasConfiguracion',};
-            // Si es una de las nuevas ventanas, usar la ruta específica
-            if (routeMap[number]) { router.push(routeMap[number]);} 
-            else {  router.push(`./Ventana${number}`);}  };
-    return (
-              <TouchableOpacity style={[styles.squareButton, { backgroundColor: color }]} onPress={handlePress}>
-                  <Icon name={icon} size={30} color="white" style={styles.buttonIcon} />
-                  <Text style={[styles.buttonText, { color: 'white' }]}>{t(titleKey)}</Text>
-              </TouchableOpacity>);
-  };
-  
-function HomeScreen() {
-  const router = useRouter();
-  const { theme } = useTheme();
-  const { t} = useLanguage(); // Usar el hook de idioma
-  const [loginModalVisible, setLoginModalVisible] = useState(false);
-  const [registerModalVisible, setRegisterModalVisible] = useState(false);
-  const [loginUsername, setLoginUsername] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [recoveryDni, setRecoveryDni] = useState("");
-  const [menuVisible, setMenuVisible] = useState(false);
-  const colorScheme = useColorScheme();
-  const slideAnim = useRef(new Animated.Value(100)).current;
-  const [usernameDisplay, setUsernameDisplay] = useState("");
-  const screenWidth = Dimensions.get('window').width;
-  const horizontalScrollViewPadding = 16;
-  const itemWidth = screenWidth - (horizontalScrollViewPadding * 2);
-  
-  const stylescontainer = { flex: 1, alignItems: "center", backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0', };
-  const textColorStyle = { color: theme === 'dark' ? '#fff' : '#000'};
-  const linkColorStyle = { color: theme === 'dark' ? '#1E90FF' : '#1E90FF' };
-  // Estado para notificaciones
-  const [userData, setUserData] = useState({ email: '',   phone: '',  loading: false,  error: null });
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Definición actualizada de ventanas con traducciones, con colores e íconos para cada boton de ventana///////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const ventanas = [
+  { number: 1, titleKey: 'consumo en tiempo real', color: '#3498db', icon: 'electric-bolt' },
+  { number: 2, titleKey: 'Analisis de Consumo', color: '#065828ff', icon: 'show-chart' },
+  { number: 3, titleKey: 'Historial de Consumo', color: '#e74c3c', icon: 'history' },
+  { number: 4, titleKey: 'Comparaciones y Tendencias  ', color: '#9b59b6', icon: 'compare' },
+  { number: 5, titleKey: 'Diagnosticos y Mantenimiento', color: '#40d916ff', icon: 'build' },
+  { number: 6, titleKey: 'Alertas y Notificaciones', color: '#f39c12', icon: 'notifications' }, 
+  { number: 9, titleKey: 'configuración', color: '#34495e', icon: 'settings' },
 
-  const fetchUserData = async (username) => {setUserData(prev => ({...prev, loading: true, error: null}));
-      try {console.log('Obteniendo datos para:', username); // Log de depuración
-          const response = await fetch('http://192.168.1.7:4000/user-data', {
-          method: 'POST', headers: {'Content-Type': 'application/json',},
-          body: JSON.stringify({ username })
-          });
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-          const text = await response.text();
-          console.error('Respuesta no JSON:', text);
-          throw new Error(`Error del servidor: ${text.substring(0, 100)}`);
-         }
+];
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Componente VentanaButton con navegacion de ventanas////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const VentanaButton = ({ number, titleKey, color, icon }) => {
+  const router = useRouter();
+  const { t } = useLanguage();
+  const handlePress = () => {
+    const routeMap = { /* Mapeo de números a rutas específicas */ };
+    if (routeMap[number]) {
+      router.push(routeMap[number]);
+    } else {
+      router.push(`./Ventana${number}`);
+    }
+  };
+  return (
+    <TouchableOpacity style={[styles.squareButton, { backgroundColor: color }]} onPress={handlePress}>
+      <Icon name={icon} size={30} color="white" style={styles.buttonIcon} />
+      <Text style={[styles.buttonText, { color: 'white' }]}>{t(titleKey)}</Text>
+    </TouchableOpacity>
+  )
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//Funcion de la pantalla principal HomeScreen, que contiene el estado de la aplicacion, el manejo de login, registro, recuperacion de contraseña y el menu lateral con chat bot//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function HomeScreen() {
+ 
+  const { theme } = useTheme();
+  const { t } = useLanguage();
+  
+  // Estados para autenticación
+  const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'recovery'
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [usernameDisplay, setUsernameDisplay] = useState("");
+
+  // Estados para login
+  const [loginData, setLoginData] = useState({
+    username: '',
+    password: '',
+    showPassword: false,
+  });
+
+  // Estados para registro
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    lastnamePaterno: '',
+    lastnameMaterno: '',
+    dni: '',
+    email: '',
+    phone: '',
+    username: '',
+    password: '',
+    confirmPassword: '',
+    showPassword: false,
+    showConfirmPassword: false,
+    termsAccepted: false,
+  });
+
+  // Estados para recuperación
+  const [recoveryData, setRecoveryData] = useState({
+    dni: '',
+    token: '',
+    newPassword: '',
+    confirmPassword: '',
+    showPassword: false,
+    step: 1,
+  });
+
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  // Animaciones
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
+
+  const textColorStyle = { color: theme === 'dark' ? '#fff' : '#26dd12'};
+  
+  // Estado para datos de usuario
+  const [userData, setUserData] = useState({
+    email: '',
+    phone: '',
+    loading: false,
+    error: null
+  });
+
+  // Función para buscar datos de usuario
+  const BuscarDatosDeUsuario = async (username) => {
+    setUserData(prev => ({...prev, loading: true, error: null}));
+    try {
+      const response = await fetch('http://10.10.7.245:4000/user-data', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username } )
+      });
       const data = await response.json();
-      console.log('Datos recibidos:', data); // Log de depuración
-      if (!response.ok || !data.success) {throw new Error(data.error || 'Error al obtener datos');}
-      setUserData({ email: data.email || '', phone: data.phone || '', loading: false,  error: null });} 
-      catch (error) {console.error('Error en fetchUserData:', error);
-      setUserData(prev => ({
-        ...prev, loading: false, error: error.message || 'Error de conexión'  })); } };
-  // Función mejorada para actualizar datos
+      if (!response.ok) throw new Error(data.error || 'Error al obtener datos');
+      setUserData({
+        email: data.email || '',
+        phone: data.phone || '',
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      setUserData(prev => ({...prev, loading: false, error: error.message || 'Error de conexión'}));
+    }
+  };
+
+  // Función para actualizar datos de usuario
   const updateUserData = async (username, newEmail, newPhone) => {
     setUserData(prev => ({...prev, loading: true, error: null}));
-    
     try {
-      console.log('Enviando actualización:', { username, newEmail, newPhone }); // Log de depuración
-        const response = await fetch('http://192.168.1.7:4000/update-user-data', {
-        method: 'POST', headers: {'Content-Type': 'application/json', },
-        body: JSON.stringify({ username,email: newEmail,phone: newPhone }) });
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error('Respuesta no JSON:', text);
-        throw new Error(`Error del servidor: ${text.substring(0, 100)}`);
-      }
+      const response = await fetch('http://10.10.7.245:4000/update-user-data', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, email: newEmail, phone: newPhone } )
+      });
       const data = await response.json();
-      console.log('Respuesta del servidor:', data); // Log de depuración
-      if (!response.ok || !data.success) {throw new Error(data.error || 'Error al actualizar datos');}
-      // Actualizar el estado local con los datos confirmados por el servidor
-      setUserData({ email: data.email, phone: data.phone,loading: false,error: null});
-      Alert.alert('Éxito', data.message || 'Datos actualizados correctamente');
+      if (!response.ok) throw new Error(data.error || 'Error al actualizar datos');
+      setUserData({ email: data.email, phone: data.phone, loading: false, error: null });
+      Alert.alert(t('success'), data.message || 'Datos actualizados correctamente');
       return true;
     } catch (error) {
-      console.error('Error en updateUserData:', error);
-      setUserData(prev => ({ ...prev, loading: false,error: error.message }));
+      setUserData(prev => ({ ...prev, loading: false, error: error.message }));
       Alert.alert('Error', error.message || 'No se pudieron actualizar los datos');
       return false;
     }
   };
-    // Estilos dinámicos
+useEffect(() => {
+  StatusBar.setHidden(true, 'fade');
+  return () => {
+    // Cleanup opcional para restaurar si sales de la pantalla
+  };
+}, []);
 
-  useEffect(() => { if (isLoggedIn) { Animated.timing(slideAnim, {toValue: 0, duration: 500,useNativeDriver: true, }).start();}}, [isLoggedIn]);
-  useEffect(() => {
-      const loadLoginState = async () => {
-      const storedLogin = await AsyncStorage.getItem('isLoggedIn');
-      if (storedLogin === 'true') {setIsLoggedIn(true);
-        const username = await AsyncStorage.getItem('loginUsername');
-        if (username) setUsernameDisplay(username); } };
-    loadLoginState(); }, []);
-
-  useEffect(() => {const backAction = () => { if (isLoggedIn) { BackHandler.exitApp(); return true;}
-      return false; };
-    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
-    return () => backHandler.remove(); }, [isLoggedIn]);
-
-  const handleLogin = async () => { if (!loginUsername || !loginPassword) {
-      Alert.alert("Error", t('pleaseCompleteAllFields')); return; }
+  // Función de login
+  const handleLogin = async () => {
+    const { username, password } = loginData;
+    if (!username.trim() || !password.trim()) {
+      Alert.alert('Error', 'Por favor completa todos los campos');
+      return;
+    }
+    setIsLoading(true);
     try {
-      const response = await fetch("http://192.168.1.7:4000/login", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ usuario: loginUsername, password: loginPassword }), });
-
+      const response = await fetch('http://10.10.7.245:4000/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: username.trim( ), password: password.trim() }),
+      });
       const data = await response.json();
       if (response.ok) {
-        await AsyncStorage.setItem('loginUsername', loginUsername);
+        await AsyncStorage.setItem('loginUsername', username.trim());
         await AsyncStorage.setItem('isLoggedIn', 'true');
-        setUsernameDisplay(loginUsername);
-        Alert.alert(t('welcome'), `${t('hello')}, ${loginUsername}`);
+        setUsernameDisplay(username.trim());
+        Alert.alert('Bienvenido', `Hola, ${username.trim()}`);
         setIsLoggedIn(true);
-        setLoginModalVisible(false);
-        setLoginUsername("");
-        setLoginPassword("");
-        console.log('Obteniendo datos adicionales...');
-        await fetchUserData(loginUsername);} 
-        else { Alert.alert(t('error'), data.error || t('incorrectCredentials'));}} 
-        catch (error) {Alert.alert(t('error'), t('couldNotConnectToServer')); } };
+        setLoginData({ username: '', password: '', showPassword: false });
+        await BuscarDatosDeUsuario(username.trim());
+      } else {
+        Alert.alert('Error', data.error || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const handleRegister = async (formData) => {
-    const { name, lastnamePaterno, lastnameMaterno, dni, email, phone, username, password } = formData;
-    if (!name || !lastnamePaterno || !lastnameMaterno || !dni || !email || !phone || !username || !password) {
-      Alert.alert(t('error'), t('allFieldsRequired')); return; }
-    try { const response = await fetch("http://192.168.1.7:4000/register", {
-              method: "POST", headers: { "Content-Type": "application/json" },   body: JSON.stringify(formData), });
+// (Continuación del código anterior...)
+
+  // Función de registro
+  const handleRegister = async () => {
+    const { name, lastnamePaterno, lastnameMaterno, dni, email, phone, username, password, confirmPassword, termsAccepted } = registerData;
+
+    if (!name || !lastnamePaterno || !lastnameMaterno || !dni || !email || !phone || !username || !password || !confirmPassword) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      return;
+    }
+    if (!termsAccepted) {
+      Alert.alert('Error', 'Debes aceptar los términos y condiciones');
+      return;
+    }
+    if (!/^\d{8}$/.test(dni)) {
+      Alert.alert('Error', 'El DNI debe tener 8 dígitos');
+      return;
+    }
+    if (!email.includes('@')) {
+      Alert.alert('Error', 'Por favor ingresa un correo electrónico válido');
+      return;
+    }
+    if (!/^\d{9}$/.test(phone)) {
+      Alert.alert('Error', 'Por favor ingresa un número de celular válido');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://10.10.7.245:4000/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          lastnamePaterno,
+          lastnameMaterno,
+          dni,
+          email,
+          phone,
+          username,
+          password,
+        } ),
+      });
       const data = await response.json();
-      if (response.ok) {Alert.alert(t('success'), t('userRegisteredSuccessfully'));
-        setRegisterModalVisible(false);} 
-      else {Alert.alert(t('error'), data.message || t('registrationError'));}} 
-      catch (error) { Alert.alert(t('error'), t('couldNotConnectToServer')); } };
-  const handleRecovery = async () => {
-    if (!/^\d{8}$/.test(recoveryDni)) {Alert.alert(t('error'), t('dniMustHave8Digits'));return; }
-    try {const response = await fetch('http://192.168.1.7:4000/recover-password', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },body: JSON.stringify({ dni: recoveryDni }) });
+      if (response.ok) {
+        Alert.alert('Éxito', 'Usuario registrado exitosamente');
+        setCurrentView('login');
+        setRegisterData({ // Limpiar formulario
+          name: '', lastnamePaterno: '', lastnameMaterno: '', dni: '', email: '', phone: '',
+          username: '', password: '', confirmPassword: '', showPassword: false,
+          showConfirmPassword: false, termsAccepted: false,
+        });
+      } else {
+        Alert.alert('Error', data.message || 'Error en el registro');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Función para solicitar token de recuperación
+  const handleRecoveryRequest = async () => {
+    if (!/^\d{8}$/.test(recoveryData.dni)) {
+      Alert.alert('Error', 'El DNI debe tener 8 dígitos');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://10.10.7.245:4000/recover-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dni: recoveryData.dni } ),
+      });
       const data = await response.json();
-      if (!response.ok) { throw new Error(data.message || t('requestError')); }
-      Alert.alert(t('success'),  data.message, [{ text: 'OK', onPress: () => router.push(`/recover?dni=${recoveryDni}`) }]); } 
-      catch (error) {console.error('Error completo:', error);
-      Alert.alert(t('error'), error.message || t('couldNotCompleteRequest')); }};
+      if (response.ok) {
+        Alert.alert('Éxito', data.message);
+        setRecoveryData(prev => ({ ...prev, step: 2 }));
+      } else {
+        Alert.alert('Error', data.message || 'Error al solicitar recuperación');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // Función para actualizar contraseña
+  const handlePasswordUpdate = async () => {
+    const { dni, token, newPassword, confirmPassword } = recoveryData;
+    if (!token || !newPassword || !confirmPassword) {
+      Alert.alert('Error', 'Todos los campos son obligatorios');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      Alert.alert('Error', 'Las contraseñas no coinciden');
+      return;
+    }
+    if (newPassword.length < 6) {
+      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://10.10.7.245:4000/update-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dni, token, newPassword } ),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        Alert.alert('Éxito', 'Contraseña actualizada exitosamente');
+        setCurrentView('login');
+        setRecoveryData({ // Limpiar formulario
+          dni: '', token: '', newPassword: '', confirmPassword: '',
+          showPassword: false, step: 1,
+        });
+      } else {
+        Alert.alert('Error', data.message || 'Error al actualizar contraseña');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo conectar al servidor');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  // useEffect para animaciones y estado de login
+  useEffect(() => {
+    // Animaciones de entrada
+    Animated.parallel([
+      Animated.timing(fadeAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+      Animated.timing(slideAnim, { toValue: 0, duration: 800, useNativeDriver: true }),
+    ]).start();
 
-  
+    // Animación de pulso
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.04, duration: 2000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
+      ])
+    );
+    pulseAnimation.start();
 
-  // Función para cambiar el idioma
-  return (
-  
-    <View style= {styles.container} >
-          <Text style={[styles.title, { color: theme === 'dark' ? '#fff' : '#f0f0f0' }]}> {t('Electro Puno')}  </Text>
-          <Image 
-              source={{ uri: "https://play-lh.googleusercontent.com/DYqaWw8yc736ZEBR39J3pL6DvEDxKxM66LZ-Nc240OwpCWICFogJj7eH80Ls4EgveLE=w600-h300-pc0xffffff-pd" }} 
-              style={styles.image}  />
-          {!isLoggedIn ? (
-            <>
-              <TouchableOpacity  style={[styles.button, { marginTop: 500 }]} onPress={() => setLoginModalVisible(true)} >
-                  <Text style={styles.buttonText}>{t('Iniciar_sesión')}</Text>
-              </TouchableOpacity>
-              
-              <View style={{ marginTop: 30 }}>
-                  <Text style={[styles.letra, { marginBottom: 8 }, {marginLeft:20}]}>{t('Olvidaste_contraseña?')} </Text>
-                  <TextInput placeholder={t('Ingresa_tu_DNI')} value={recoveryDni} onChangeText={setRecoveryDni} style={styles.input} 
-                    keyboardType="numeric" placeholderTextColor="#999"
-                  />
-                  <TouchableOpacity style={styles.recoverButton} onPress={handleRecovery}>
-                      <Text style={styles.recoverButtonText}>{t('Recuperar_Contraseña')}</Text>
-                  </TouchableOpacity>
-              </View>
-              
-              <View style={{ flexDirection: 'row', marginTop: 30 }}>
-                  <Text style={styles.letra}>{t('no tienes cuenta?')} </Text>
-                  <Text style={[styles.linkText, linkColorStyle]} onPress={() => setRegisterModalVisible(true)}>
-                    {t('Registrate Aquí')}
-                  </Text>
-              </View>
-            </>
-      ) : (
-            <>
-              <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff' }]} onPress={() => setMenuVisible(true)}>
-                    <Icon name="menu" size={30} color={theme === 'dark' ? '#fff' : '#000'} />
-              </TouchableOpacity>   
-              <ScrollView style={{ flex: 1 }} contentContainerStyle={{  padding: horizontalScrollViewPadding,backgroundColor: theme === 'dark' ? '#333' : '#f0f0f0'}} showsVerticalScrollIndicator={false} >
-                    <Text style={[styles.welcomeText, textColorStyle]}> {t('bienvenido', { username: usernameDisplay })} </Text>
-                    <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: slideAnim }] }]}>
-                      {ventanas.map((ventana) => ( <VentanaButton key={ventana.number} number={ventana.number} titleKey={ventana.titleKey} color={ventana.color} icon={ventana.icon}/>))}
-                    </Animated.View>
-              </ScrollView>
-              <SideMenu isVisible={menuVisible}
-                        onClose={() => setMenuVisible(false)}
-                        username={usernameDisplay}
-                        email={userData.email}
-                        phone={userData.phone}
-                        loading={userData.loading}
-                        error={userData.error}
-                        onUpdate={async (newEmail, newPhone) => {const success = await updateUserData(usernameDisplay, newEmail, newPhone);
-                                                                return success; }}
-                onLogout={async () => { await AsyncStorage.removeItem('isLoggedIn');  setIsLoggedIn(false);}} />
-              <ChatBot />
-            </>
-      )}
+    // Animación de brillo
+    const glowAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, { toValue: 1, duration: 3000, useNativeDriver: false }),
+        Animated.timing(glowAnim, { toValue: 0, duration: 3000, useNativeDriver: false }),
+      ])
+    );
+    glowAnimation.start();
 
-      <LoginModal
-        visible={loginModalVisible}
-        onClose={() => setLoginModalVisible(false)}
-        username={loginUsername}
-        setUsername={setLoginUsername}
-        password={loginPassword}
-        setPassword={setLoginPassword}
-        showPassword={showPassword}
-        setShowPassword={setShowPassword}
-        handleLogin={handleLogin}
-      />
+    // Cargar estado de login
+    const loadLoginState = async () => {
+      const storedLogin = await AsyncStorage.getItem('isLoggedIn');
+      if (storedLogin === 'true') {
+        const username = await AsyncStorage.getItem('loginUsername');
+        if (username) {
+          setUsernameDisplay(username);
+          setIsLoggedIn(true);
+          await BuscarDatosDeUsuario(username);
+        }
+      }
+    };
+    loadLoginState();
 
-      <RegisterModal
-        visible={registerModalVisible}
-        onClose={() => setRegisterModalVisible(false)}
-        handleRegister={handleRegister}
-      />
+    return () => {
+      pulseAnimation.stop();
+      glowAnimation.stop();
+    };
+  }, [fadeAnim, slideAnim, pulseAnim, glowAnim]);
+
+  // useEffect para manejar botón de retroceso
+  useEffect(() => {
+    const backAction = () => {
+      if (isLoggedIn) {
+        BackHandler.exitApp();
+        return true;
+      }
+      return false;
+    };
+    const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
+    return () => backHandler.remove();
+  }, [isLoggedIn]);
+
+  // Renderizar formulario de login
+  const renderLoginForm = () => (
+    <View style={styles.formContainer}>
+      <Text style={styles.title}>INICIAR SESIÓN</Text>
+      <Text style={styles.subtitle}>Accede a tu cuenta</Text>
+      <View style={styles.inputContainer}>
+        <Icon name="person" size={20} color="#00FFFF" style={styles.inputIcon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Usuario"
+          placeholderTextColor="#666"
+          value={loginData.username}
+          onChangeText={(text) => setLoginData(prev => ({ ...prev, username: text }))}
+          autoCapitalize="none"
+        />
+      </View>
+      <View style={styles.inputContainer}>
+        <Icon name="lock" size={20} color="#00FFFF" style={styles.inputIcon} />
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          placeholderTextColor="#666"
+          value={loginData.password}
+          onChangeText={(text) => setLoginData(prev => ({ ...prev, password: text }))}
+          secureTextEntry={!loginData.showPassword}
+          autoCapitalize="none"
+        />
+        <TouchableOpacity onPress={() => setLoginData(prev => ({ ...prev, showPassword: !prev.showPassword }))} style={styles.eyeButton}>
+          <Icon name={loginData.showPassword ? "visibility-off" : "visibility"} size={20} color="#00FFFF" />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity style={[styles.primaryButton, isLoading && styles.disabledButton]} onPress={handleLogin} disabled={isLoading}>
+        <LinearGradient colors={['#00FFFF', '#0080FF', '#8000FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientButton}>
+          <Text style={styles.buttonText}>{isLoading ? 'INICIANDO...' : 'INICIAR SESIÓN'}</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+      <View style={styles.linkContainer}>
+        <TouchableOpacity onPress={() => setCurrentView('recovery')}><Text style={styles.linkText}>¿Olvidaste tu contraseña?</Text></TouchableOpacity>
+        <TouchableOpacity onPress={() => setCurrentView('register')}><Text style={styles.linkText}>¿No tienes cuenta? Regístrate</Text></TouchableOpacity>
+      </View>
     </View>
- 
+  );
+
+  // Renderizar formulario de registro
+  const renderRegisterForm = () => (
+    <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>REGISTRO</Text>
+        <Text style={styles.subtitle}>Crea tu cuenta</Text>
+        {/* Inputs para nombre, apellidos, dni, email, etc. */}
+        <View style={styles.inputContainer}><Icon name="person" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Nombre" placeholderTextColor="#666" value={registerData.name} onChangeText={(text) => setRegisterData(prev => ({ ...prev, name: text }))} /></View>
+        <View style={styles.inputContainer}><Icon name="person" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Apellido Paterno" placeholderTextColor="#666" value={registerData.lastnamePaterno} onChangeText={(text) => setRegisterData(prev => ({ ...prev, lastnamePaterno: text }))} /></View>
+        <View style={styles.inputContainer}><Icon name="person" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Apellido Materno" placeholderTextColor="#666" value={registerData.lastnameMaterno} onChangeText={(text) => setRegisterData(prev => ({ ...prev, lastnameMaterno: text }))} /></View>
+        <View style={styles.inputContainer}><Icon name="credit-card" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="DNI" placeholderTextColor="#666" value={registerData.dni} onChangeText={(text) => setRegisterData(prev => ({ ...prev, dni: text }))} keyboardType="numeric" maxLength={8} /></View>
+        <View style={styles.inputContainer}><Icon name="email" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Correo Electrónico" placeholderTextColor="#666" value={registerData.email} onChangeText={(text) => setRegisterData(prev => ({ ...prev, email: text }))} keyboardType="email-address" autoCapitalize="none" /></View>
+        <View style={styles.inputContainer}><Icon name="phone" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Número de Celular" placeholderTextColor="#666" value={registerData.phone} onChangeText={(text) => setRegisterData(prev => ({ ...prev, phone: text }))} keyboardType="phone-pad" maxLength={9} /></View>
+        <View style={styles.inputContainer}><Icon name="account-circle" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Usuario" placeholderTextColor="#666" value={registerData.username} onChangeText={(text) => setRegisterData(prev => ({ ...prev, username: text }))} autoCapitalize="none" /></View>
+        <View style={styles.inputContainer}><Icon name="lock" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Contraseña" placeholderTextColor="#666" value={registerData.password} onChangeText={(text) => setRegisterData(prev => ({ ...prev, password: text }))} secureTextEntry={!registerData.showPassword} autoCapitalize="none" /><TouchableOpacity onPress={() => setRegisterData(prev => ({ ...prev, showPassword: !prev.showPassword }))} style={styles.eyeButton}><Icon name={registerData.showPassword ? "visibility-off" : "visibility"} size={20} color="#00FFFF" /></TouchableOpacity></View>
+        <View style={styles.inputContainer}><Icon name="lock" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Confirmar Contraseña" placeholderTextColor="#666" value={registerData.confirmPassword} onChangeText={(text) => setRegisterData(prev => ({ ...prev, confirmPassword: text }))} secureTextEntry={!registerData.showConfirmPassword} autoCapitalize="none" /><TouchableOpacity onPress={() => setRegisterData(prev => ({ ...prev, showConfirmPassword: !prev.showConfirmPassword }))} style={styles.eyeButton}><Icon name={registerData.showConfirmPassword ? "visibility-off" : "visibility"} size={20} color="#00FFFF" /></TouchableOpacity></View>
+        <TouchableOpacity style={styles.checkboxContainer} onPress={() => setRegisterData(prev => ({ ...prev, termsAccepted: !prev.termsAccepted }))}>
+          <View style={[styles.checkbox, registerData.termsAccepted && styles.checkboxChecked]}>{registerData.termsAccepted && (<Icon name="check" size={16} color="#000" />)}</View>
+          <Text style={styles.checkboxText}>Acepto los términos y condiciones</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.primaryButton, isLoading && styles.disabledButton]} onPress={handleRegister} disabled={isLoading}>
+          <LinearGradient colors={['#00FFFF', '#0080FF', '#8000FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientButton}>
+            <Text style={styles.buttonText}>{isLoading ? 'REGISTRANDO...' : 'REGISTRAR'}</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setCurrentView('login')}><Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text></TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+const glowOpacity = glowAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.8],
+  });
+  // Renderizar formulario de recuperación
+  const renderRecoveryForm = () => (
+    <View style={styles.formContainer}>
+      <Text style={styles.title}>RECUPERAR CONTRASEÑA</Text>
+      <Text style={styles.subtitle}>{recoveryData.step === 1 ? 'Ingresa tu DNI' : 'Ingresa el código y nueva contraseña'}</Text>
+      {recoveryData.step === 1 ? (
+        <>
+          <View style={styles.inputContainer}><Icon name="credit-card" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="DNI" placeholderTextColor="#666" value={recoveryData.dni} onChangeText={(text) => setRecoveryData(prev => ({ ...prev, dni: text }))} keyboardType="numeric" maxLength={8} /></View>
+          <TouchableOpacity style={[styles.primaryButton, isLoading && styles.disabledButton]} onPress={handleRecoveryRequest} disabled={isLoading}>
+            <LinearGradient colors={['#00FFFF', '#0080FF', '#8000FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientButton}>
+              <Text style={styles.buttonText}>{isLoading ? 'ENVIANDO...' : 'ENVIAR CÓDIGO'}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <View style={styles.inputContainer}><Icon name="vpn-key" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Código de recuperación" placeholderTextColor="#666" value={recoveryData.token} onChangeText={(text) => setRecoveryData(prev => ({ ...prev, token: text }))} autoCapitalize="none" /></View>
+          <View style={styles.inputContainer}><Icon name="lock" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Nueva contraseña" placeholderTextColor="#666" value={recoveryData.newPassword} onChangeText={(text) => setRecoveryData(prev => ({ ...prev, newPassword: text }))} secureTextEntry={!recoveryData.showPassword} autoCapitalize="none" /><TouchableOpacity onPress={() => setRecoveryData(prev => ({ ...prev, showPassword: !prev.showPassword }))} style={styles.eyeButton}><Icon name={recoveryData.showPassword ? "visibility-off" : "visibility"} size={20} color="#00FFFF" /></TouchableOpacity></View>
+          <View style={styles.inputContainer}><Icon name="lock" size={20} color="#00FFFF" style={styles.inputIcon} /><TextInput style={styles.input} placeholder="Confirmar nueva contraseña" placeholderTextColor="#666" value={recoveryData.confirmPassword} onChangeText={(text) => setRecoveryData(prev => ({ ...prev, confirmPassword: text }))} secureTextEntry={!recoveryData.showPassword} autoCapitalize="none" /></View>
+          <TouchableOpacity style={[styles.primaryButton, isLoading && styles.disabledButton]} onPress={handlePasswordUpdate} disabled={isLoading}>
+            <LinearGradient colors={['#00FFFF', '#0080FF', '#8000FF']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.gradientButton}>
+              <Text style={styles.buttonText}>{isLoading ? 'ACTUALIZANDO...' : 'ACTUALIZAR CONTRASEÑA'}</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </>
+      )}
+      <TouchableOpacity onPress={() => setCurrentView('login')}><Text style={styles.linkText}>Volver al inicio de sesión</Text></TouchableOpacity>
+    </View>
+  );
+
+  // Retorna el frontend con todas las funcionalidades
+  return (
+    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+       <StatusBar
+    barStyle="light-content"
+    backgroundColor={Platform.OS === 'android' ? '#0f0f23' : 'transparent'}
+    translucent={Platform.OS === 'android' ? true : false}
+  />
+      {!isLoggedIn ? (
+        <ImageBackground source={require('../Imagenes/FondosDePantalla/circuit_bg (1).jpg')} style={styles.backgroundImage} resizeMode="cover">
+          <LinearGradient colors={['rgba(0,0,0,0.8)', 'rgba(0,0,50,0.6)', 'rgba(0,0,0,0.8)']} style={styles.overlay}>
+            <View style={styles.logoContainer}>
+              <Text style={styles.logoTextEmoji}>⚡                  ⚡</Text>
+              <Text style={[styles.logoText1, { color: theme === 'dark' ? '#fcfcfcff' : '#044ff3ff' }]}>Pioneros</Text>
+              <Text style={[styles.logoText2, { color: theme === 'dark' ? '#fcfcfcff' : '#044ff3ff' }]}>GreenWare</Text>
+              <Text style={styles.logoSubtext}>SISTEMA DE AUTENTICACIÓN</Text>
+            </View>
+            <Animated.View style={[styles.contentContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }, { scale: pulseAnim }] }]}>
+              <BlurView intensity={20} style={styles.blurContainer}>
+                <Animated.View style={[styles.glowContainer, { shadowOpacity: glowAnim }]}>
+                  {currentView === 'login' && renderLoginForm()}
+                  {currentView === 'register' && renderRegisterForm()}
+                  {currentView === 'recovery' && renderRecoveryForm()}
+                </Animated.View>
+              </BlurView>
+            </Animated.View>
+          </LinearGradient>
+        </ImageBackground>
+      ) : (
+        <View style={styles.container}>
+          <ImageBackground source={{ uri: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80' }} style={styles.image} />
+          <Text style={[styles.title1, { color: theme === 'dark' ? '#fcfcfcff' : '#1dcfeaff' }]}>{t('   Pioneros' )}</Text>
+          <Text style={[styles.title2, { color: theme === 'dark' ? '#fcfcfcff' : '#1dcfeaff' }]}>{t('  GreenWare')}</Text>
+          <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme === 'dark' ? '#1e1e1e' : '#fff' }]} onPress={() => setMenuVisible(true)}>
+            <Icon name="menu" size={30} color={theme === 'dark' ? '#fff' : '#000'} />
+          </TouchableOpacity>
+          
+         
+
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ backgroundColor: theme === 'dark' ? '#0f0f23' : '#f0f0f0' }} showsVerticalScrollIndicator={false}>
+          
+
+           <Animated.View style={[styles.headerwelcome, { shadowOpacity: glowOpacity }]}>
+                   <LinearGradient
+                     colors={[theme === 'dark' ? '#030632ff' : '#4371e6ff', '#4e9aadff']}
+                     style={styles.headerGradientwelcome}
+                   > 
+            <Text style={[styles.welcomeText, textColorStyle]}>{t('bienvenido', { username: usernameDisplay })}</Text>
+                </LinearGradient >
+                </Animated.View>
+
+            <AnimatedCarousel />
+            <Animated.View style={[styles.buttonContainer, { transform: [{ translateY: slideAnim }] }]}>
+              {ventanas.map((ventana) => (
+                <VentanaButton key={ventana.number} number={ventana.number} titleKey={ventana.titleKey} color={ventana.color} icon={ventana.icon} />
+              ))}
+            </Animated.View>
+            
+          </ScrollView>
+          
+          <SideMenu
+            isVisible={menuVisible}
+            onClose={() => setMenuVisible(false)}
+            username={usernameDisplay}
+            email={userData.email}
+            phone={userData.phone}
+            loading={userData.loading}
+            error={userData.error}
+            onUpdate={async (newEmail, newPhone) => await updateUserData(usernameDisplay, newEmail, newPhone)}
+            onLogout={async () => {
+              await AsyncStorage.multiRemove(['isLoggedIn', 'loginUsername']);
+              setIsLoggedIn(false);
+              setUsernameDisplay("");s
+            }}
+          />
+          <ChatBot />
+        </View>
+      )}
+    </KeyboardAvoidingView>
   );
 }
 

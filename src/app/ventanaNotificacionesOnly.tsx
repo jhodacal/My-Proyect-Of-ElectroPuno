@@ -1,20 +1,19 @@
-import React  from 'react';
+import React, { useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
-import { BackHandler ,View,StyleSheet,Text,ScrollView} from 'react-native';
-import { useEffect } from 'react';
+import { View, Text, StyleSheet, BackHandler, ScrollView, SafeAreaView } from 'react-native';
+import NotificationSystem from './Settings/NotificationSystem';
 import { ThemeProvider } from '../herramientasDeLaApp/ThemeContext';
 import BackButton from '../herramientasDeLaApp/BackButton';
-import DiagnosticoMantenimiento from './Settings/DiagnosticoMantenimiento';
 import { useTheme } from '../herramientasDeLaApp/ThemeContext';
 import { useLanguage } from '../herramientasDeLaApp/LanguageContext';
 
-
+ 
 const router = useRouter();
 
-function Ventana4() {
+function ScreenNotificaciones() {
   const { theme } = useTheme();
   const { t } = useLanguage();
-    useEffect(() => {
+  useEffect(() => {
     const backAction = () => {
       if (router.canGoBack()) {
         router.back();
@@ -33,13 +32,13 @@ function Ventana4() {
   }, [router]);
 
   return (
-     <ThemeProvider>
+    <ThemeProvider>
       <View style={[styles.container, themedStyles.container(theme)]}>
         <Stack.Screen />
         {/* Header fijo */}
         <View style={[styles.header, themedStyles.header(theme)]}>
           <BackButton onPress={() => router.back()} tintColor={themedStyles.text(theme).color} />
-          <Text style={[styles.title,themedStyles.text(theme)]}> {t('Diagnostico y Mantenimiento')}</Text>
+          <Text style={[styles.title, themedStyles.text(theme)]}> {t('Notificaciones')}</Text>
         </View>
 
         {/* Contenido desplazable */}
@@ -47,7 +46,7 @@ function Ventana4() {
           contentContainerStyle={styles.scrollContent}
           style={styles.scrollView}
         >
-          <DiagnosticoMantenimiento />
+          <NotificationSystem />
         </ScrollView>
       </View>
     </ThemeProvider>
@@ -55,7 +54,7 @@ function Ventana4() {
 }
 
 const styles = StyleSheet.create({
-   container: {
+  container: {
     flex: 1,
   },
   header: {
@@ -95,4 +94,4 @@ const themedStyles = {
   text: (theme: string) => ({ color: theme === 'dark' ? '#ffffff' : '#000000' }),
 };
 
-export default Ventana4;
+export default ScreenNotificaciones;
