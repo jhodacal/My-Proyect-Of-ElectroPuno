@@ -7,48 +7,28 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const axios = require('axios');
 
-const { InfluxDB, Point } = require('@influxdata/influxdb-client');
-const http = require('http');
 
-const socketIo = require('socket.io');
+
 
 const app = express();
-const server = http.createServer(app);
-const io = socketIo(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
-  }
-});
+
 app.use(express.json());
 app.use(cors());
 
 
 // Configuración de la base de datos
 const dbConfig = {
-  host: '192.168.1.7',
-  user: 'root',
-  password: 'my-secret-pw',
-  database: 'usuarios',
-  port: 3307
- 
+  host: process.env.DB_HOST || '34.10.184.218',
+  user: process.env.DB_USER || 'jhodacal',
+  password: process.env.DB_PASSWORD, // ← Esto debe venir de .env
+  database: process.env.DB_NAME || 'usuarios',
+  port: process.env.DB_PORT || 3306,
+
 };
 
-const mqttConfig = {
-  broker: process.env.MQTT_BROKER || 'ws://broker.emqx.io:8083/mqtt',
-  topic: process.env.MQTT_TOPIC || 'energy_monitor/+/data',
-  clientId: `backend_${Math.random().toString(16).slice(3)}`
-};
-const influxConfig = {
-  url: process.env.INFLUXDB_URL || 'http://192.168.1.7:8086',
-  token: process.env.INFLUXDB_TOKEN || 'xC_L3_e59K130VqbQtRsMS1jWSDpr3Oyo3Ymz9jk1I5AmH0evoSoUJ8b06GSqKUjOfXytRBpoiZ4reEuqw24Ag==',
-  org: process.env.INFLUXDB_ORG || 'af7a8ce35e82246d',
-  bucket: process.env.INFLUXDB_BUCKET || 'Datos_de_energia'
-};
 
-const influxClient = new InfluxDB({ url: influxConfig.url, token: influxConfig.token });
-let mqttClient = null;
-// Configuración del transporter de correo
+
+
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -204,7 +184,7 @@ async function testConnection() {
 }
 
 testConnection();
-
+/*
 async function getUserIdByDeviceCode(deviceCode) {
   let connection;
   try {
@@ -224,7 +204,7 @@ async function getUserIdByDeviceCode(deviceCode) {
   } finally {
     if (connection) await connection.end();
   }
-}
+}*/
 
 app.post('/chat', async (req, res) => {
   const { message, language } = req.body;
@@ -745,5 +725,5 @@ app.post('/update-password', async (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor corriendo en http://34.10.184.218:${PORT}`);
 });
